@@ -1,0 +1,25 @@
+{
+  "name": "homebridge-telldus-tdtool",
+  "version": "1.0.0",
+  "description": "A Telldus TDtool Adapter for Homebridge",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/.bin/jasmine JASMINE_CONFIG_PATH=jasmine.json"
+  },
+  "keywords": [
+    "telldus",
+    "tdtool",
+    "homebridge",
+    "homebridge-plugin"
+  ],
+  "author": "Anton Amlinger <anton.amlinger@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "proxyquire": "^1.7.4",
+    "jasmine": "^2.4.1"
+  },
+  "dependencies": {
+    "homebridge": "*",
+    "tellstick-confparser": "^1.0.2"
+  }
+}

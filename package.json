@@ -18,6 +18,10 @@
     "proxyquire": "^1.7.4",
     "jasmine": "^2.4.1"
   },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/amlinger/homebridge-telldus-tdtool.git"
+  },
   "dependencies": {
     "homebridge": "*",
     "tellstick-confparser": "^1.0.2"

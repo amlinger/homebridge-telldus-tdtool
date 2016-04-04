@@ -154,7 +154,7 @@ class TelldusTDToolPlatform {
 
       callback(devices.map(data =>
         new TelldusAccessory(data, this.log, this.homebridge, this.config)))
-    }, error => callback(error))
+    }, error => callback(new Error(error)))
   }
 }
 

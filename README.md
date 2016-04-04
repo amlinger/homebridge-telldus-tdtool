@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/amlinger/homebridge-telldus-tdtool.svg?branch=master)](https://travis-ci.org/amlinger/homebridge-telldus-tdtool)
+
 # Homebridge Telldus tdtool
 A Homebridge plugin for Tellstick without Live, interfaced with the CLI tool tdtool.
 

@@ -19,11 +19,11 @@
     "jasmine": "^2.4.1"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/amlinger/homebridge-telldus-tdtool.git"
+    "type": "git",
+    "url": "https://github.com/amlinger/homebridge-telldus-tdtool.git"
   },
   "dependencies": {
-    "tellstick-confparser": "^1.0.2"
+    "tellstick.conf-parser": "^1.0.1"
   },
   "engines": {
     "node": ">=0.12.0",

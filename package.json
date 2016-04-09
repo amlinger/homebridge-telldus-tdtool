@@ -1,6 +1,6 @@
 {
   "name": "homebridge-telldus-tdtool",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Telldus TDtool Adapter for Homebridge",
   "main": "./dist/index.js",
   "scripts": {

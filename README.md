@@ -50,7 +50,7 @@ like the following when you have added this platform:
 ```
 
 ## Dependencies & Trade-offs
-This plugin depends on `tellstick-confparser`. This is because `tdtool` does
+This plugin depends on `tellstick.conf-parser`. This is because `tdtool` does
 not output the model of a connected device, making it not possible to provide
 a devices characteristics for Homebridge unless we peek in TellSticks
 configuration file and check the model there.

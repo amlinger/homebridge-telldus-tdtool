@@ -16,8 +16,8 @@ supported. TellStick net will support `telldus-core`,
 ## Installation
 
 Install this plugin globally by typing the following.
-```sh
-$ npm install -g homebridge-telldus-tdtool
+```bash
+npm install -g homebridge-telldus-tdtool
 ```
 Installing the package globally is not a requirement, but makes it easier if
 you have also installed Homebridge globally. Otherwise, just install this
@@ -47,6 +47,22 @@ like the following when you have added this platform:
     "name" : "Telldus-TD-Tool"
   }]
 }
+```
+
+### Building it yourself
+
+This module is written in ES6. To support earlier versions of Node, this is
+transpiled using Babel to regular ES5. To build it yourself, make sure you have
+installed all the development dependencies (this is usually done by default
+with `npm install`). To make sure, you can run:
+```sh
+npm install --only=dev
+```
+after you have issued the regular install command.
+
+To build the dist folder, then run
+```bash
+npm run build
 ```
 
 ## Dependencies & Trade-offs

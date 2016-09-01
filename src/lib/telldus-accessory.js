@@ -74,16 +74,12 @@ class TelldusAccessory {
     switch(characteristic.props.format) {
       case this.Characteristic.Formats.BOOL:
         (value ? TDtool.on(this.id) : TDtool.off(this.id)).then(out => {
-	this.log('Response: ' + out)
           return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
 
 
           // FIXME: This does not appear to actually be raising an error to
           //        Homebridge, check out http://goo.gl/RGuILo . Same as below.
-        }, error => {
-	this.log('error: ' + error)
-	callback(new Error(error))
-	})
+        }, error => { callback(new Error(error)) })
 	break
       case this.Characteristic.Formats.INT:
         TDtool.dimlevel(value*255.0/100, this.id).then(out => {

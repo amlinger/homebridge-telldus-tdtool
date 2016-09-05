@@ -48,9 +48,6 @@ const TDtool = {
   run: (cmd, target) => TDtool.isInstalled().then(() =>
     execute(`tdtool ${cmd} ${target}`)),
 
- run: (cmd1, target1, cmd2, target2) => TDtool.isInstalled().then(() =>
-    execute(`tdtool ${cmd1} ${target1} ${cmd2} ${target2}`)),
-
   /**
    * Shorthand methods for running a command on a Device with the given
    * Device ID.
@@ -61,8 +58,8 @@ const TDtool = {
    */
   on:  id => TDtool.run('--on', id),
   off: id => TDtool.run('--off', id),
-  dim: id => TDtool.run('--dim', id),
-  dimlevel: (level, id) => TDtool.run('--dimlevel', level, '--dim', id),
+  dim: (level, id) => TDtool.isInstalled().then(() =>
+      execute(`tdtool --dimlevel ${level} --dim ${id}`)),
 }
 
 module.exports = TDtool

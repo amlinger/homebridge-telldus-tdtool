@@ -82,7 +82,7 @@ class TelldusAccessory {
         }, error => { callback(new Error(error)) })
 	break
       case this.Characteristic.Formats.INT:
-        TDtool.dimlevel(value*255.0/100, this.id).then(out => {
+        TDtool.dim(value*255.0/100, this.id).then(out => {
           return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
 
           // FIXME: This does not appear to actually be raising an error to

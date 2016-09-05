@@ -58,8 +58,8 @@ const TDtool = {
    */
   on:  id => TDtool.run('--on', id),
   off: id => TDtool.run('--off', id),
-  dim: id => TDtool.run('--dim', id),
-  dimlevel: level => TDtool.run('--dimlevel', level),
+  dim: (level, id) => TDtool.isInstalled().then(() =>
+      execute(`tdtool --dimlevel ${level} --dim ${id}`)),
 }
 
 module.exports = TDtool

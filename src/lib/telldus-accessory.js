@@ -74,12 +74,18 @@ class TelldusAccessory {
     switch(characteristic.props.format) {
       case this.Characteristic.Formats.BOOL:
         (value ? TDtool.on(this.id) : TDtool.off(this.id)).then(out => {
-          callback(null, out.endswith('Success'))
+          return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
+
+          // FIXME: This does not appear to actually be raising an error to
+          //        Homebridge, check out http://goo.gl/RGuILo . Same as below.
         }, error => callback(new Error(error)))
         break
       case this.Characteristic.Formats.INT:
         TDtool.dim(percentageToBits(value), this.id).then(out => {
-          callback(null, out.endswith('Success'))
+          return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
+
+          // FIXME: This does not appear to actually be raising an error to
+          //        Homebridge, check out http://goo.gl/RGuILo . Same as above.
         }, error => callback(new Error(error)))
         break
       default:

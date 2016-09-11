@@ -65,6 +65,26 @@ To build the dist folder, then run
 npm run build
 ```
 
+### Remote development
+
+Since a lot of people, me included, are running Homebridge on a server remote
+from where development takes place (such as on a Raspberry PI), there is a
+small, experimental script included for addressing this.
+
+This can be run by issuing:
+```bash
+npm run rsync -- user@host /path/to/node_modules/homebridge-telldus-tdtool
+```
+
+Default values for these are:
+* `user@host` - `pi`
+* `path` - `/opt/nodejs/lib/node_modules/homebridge-telldus-tdtool`
+
+To run this, it assumes a couple of things:
+1. It assumes you have `fswatch` and `rsync` installed.
+2. You have SSH keys set up for your host.
+3. You are running Homebridge using the [systemd method](SystemdMethod).
+
 ## Dependencies & Trade-offs
 This plugin depends on `tellstick.conf-parser`. This is because `tdtool` does
 not output the model of a connected device, making it not possible to provide
@@ -85,3 +105,4 @@ The links below are used for referencing above.
 [tdtool]: http://developer.telldus.se/doxygen/
 [Homebridge]: https://github.com/nfarina/homebridge
 [TellStickCompability]: http://developer.telldus.se/
+[SystemdMethod]: http://goo.gl/RQPvpn

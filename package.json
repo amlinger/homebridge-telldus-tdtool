@@ -4,6 +4,7 @@
   "description": "A Telldus TDtool Adapter for Homebridge",
   "main": "./dist/index.js",
   "scripts": {
+    "rsync": "fswatch -0 src |  xargs -0 -n 1 -I {} ./sync.sh",
     "test": "node_modules/.bin/jasmine JASMINE_CONFIG_PATH=jasmine.json",
     "build": "babel src --presets babel-preset-es2015 --out-dir dist",
     "prepublish": "npm run build"

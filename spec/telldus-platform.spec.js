@@ -25,7 +25,7 @@ describe('test', () => {
     registerInjector({
       'tellstick-confparser': jasmine.createSpy(),
       './lib/tdtool': {
-        listDevices: jasmine.createSpy().and.returnValue(null)
+        listDevices: jasmine.createSpy().and.returnValue(null),
       }
     })
     expect(Object.keys(instance)).toEqual(['log', 'config', 'homebridge'])
@@ -36,7 +36,8 @@ describe('test', () => {
       registerInjector({
         'tellstick-confparser': jasmine.createSpy(),
         './lib/tdtool': {
-          listDevices: jasmine.createSpy().and.returnValue(Promise.resolve([]))
+          listDevices: jasmine.createSpy().and.returnValue(Promise.resolve([])),
+          listSensors: jasmine.createSpy().and.returnValue(Promise.resolve([])),
         }
       })
 
@@ -98,7 +99,8 @@ describe('test', () => {
           listDevices: jasmine.createSpy().and.returnValue(
             Promise.resolve(devices)),
           device: jasmine.createSpy().and.callFake(id =>
-            Promise.resolve(devices.find(d => d.id === id)))
+            Promise.resolve(devices.find(d => d.id === id))),
+          listSensors: jasmine.createSpy().and.returnValue(Promise.resolve([]))
         }
       })
 

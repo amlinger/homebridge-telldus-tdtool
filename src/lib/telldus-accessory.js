@@ -8,13 +8,20 @@ const bitsToPercentage = value => Math.round(value * 100 / 255)
 const percentageToBits = value => Math.round(value * 255 / 100)
 
 /**
- * An Accessory convenience wrapper.
+ * A Telldus Accessory convenience wrapper.
+ *
+ * This is meant to be the abstract base class for telldus accessories, both
+ * for both devices and sensors. To extend this with new sensor types, a
+ * getServices() method needs to be included. For examples of this, have a
+ * a look below.
  */
 class TelldusAccessory {
 
   /**
-   * Inject everything used by the class. No the neatest solution, but nice for
-   * testing purposes, and avoiding globals as we don't know anything about
+   * Setup data for accessory, and inject everything used by the class.
+   *
+   * Dependency injection is used here for easier testing, and avoiding 
+   * global imports at the top of the file as we don't know anything about
    * Service, Characteristic and other Homebridge things that are injected
    * into exported provider function.
    *
@@ -29,8 +36,10 @@ class TelldusAccessory {
     this.name = data.name
     this.id = data.id
 
-    // Split manufacturer and model
-    const modelPair = data.model ? data.model.split(':') : ['N/A', 'N/A']
+    // Split manufacturer and model, which could be defined in the tellstick
+    // configuration file as model:manufacturer. If not, fallback to use
+    // "N/A" as manufacturer.
+    const modelPair = data.model ? data.model.split(':') : [data.model, 'N/A']
     this.model = modelPair[0]
     this.manufacturer = modelPair[1]
 
@@ -41,26 +50,49 @@ class TelldusAccessory {
   }
 
   /**
-   * Get the state of this Accessory with the given Characteristic.
+   * This is a noop action by default, but make sure to log that's been 
+   * called.
    *
-   * @param  {hap.Characteristic} characteristic The desired Characteristic.
+   * @param  {Function} callback Invoked when logging has been done.
+   */
+  identify(callback) {
+    this.log('Identify called.')
+    callback()
+  }
+}
+
+/**
+ * Wrapper for Telldus switches.
+ *
+ * These can be turned on and off, so it accepts a binary input when setting.
+ * This is at the moment represented by a Lightbulb controller service.
+ */
+class TelldusSwitch extends TelldusAccessory {
+
+  /**
+   * Return the last known state of the telldus device, which could either
+   * be ON or OFF. This is translated to a boolean value, that is returned to
+   * the callback.
+   *
    * @param  {Function}           callback       To be invoked when result is
    *                                             obtained.
    * @param  {object}             context
    */
-  getState(characteristic, callback, context) {
-    if (characteristic.props.format != this.Characteristic.Formats.BOOL)
-      callback('Only bool is supported')
-
+  getState(callback, context) {
     TDtool.device(this.id).then(device => {
-      callback(null, device.lastsentcommand === 'ON')
+      // For this to be applicable for the dimmer as well as the switches, it
+      // is crucial that we are comparing with OFF and not with ON. This is
+      // because when OFF is the last sent command, the device is actually
+      // off, but lastsentcommand could take other values when being on,
+      // such as DIMMED in the case when a device has been dimmed.
+      callback(null, device.lastsentcommand != 'OFF')
     })
   }
 
   /**
-   * Set the state of this Accessory with the given Characteristic.
+   * Set the state of this Accessory. This accepts a value that is either
+   * true or false, for turning it on or off.
    *
-   * @param  {hap.Characteristic} characteristic The desired Characteristic.
    * @param  {*}                  value          The value to set,
    *                                             corresponding to the passed
    *                                             Characteristic
@@ -68,83 +100,146 @@ class TelldusAccessory {
    *                                             obtained.
    * @param  {object}             context
    */
-  setState(characteristic, value, callback, context) {
-    this.log('Recieved set state request: ' + value)
+  setState(value, callback, context) {
+    this.log(`Recieved set state request: [${value ? 'on' : 'off'}]`)
 
-    switch(characteristic.props.format) {
-      case this.Characteristic.Formats.BOOL:
-        (value ? TDtool.on(this.id) : TDtool.off(this.id)).then(out => {
-          return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
+    TDtool[value ? 'on' : 'off'](this.id).then(out => {
+      return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
 
-          // FIXME: This does not appear to actually be raising an error to
-          //        Homebridge, check out http://goo.gl/RGuILo . Same as below.
-        }, error => callback(new Error(error)))
-        break
-      case this.Characteristic.Formats.INT:
-        TDtool.dim(percentageToBits(value), this.id).then(out => {
-          return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
-
-          // FIXME: This does not appear to actually be raising an error to
-          //        Homebridge, check out http://goo.gl/RGuILo . Same as above.
-        }, error => callback(new Error(error)))
-        break
-      default:
-        callback('Unsupported Characteristic')
-        break
-    }
+      // FIXME: This does not appear to actually be raising an error to
+      //        Homebridge, check out http://goo.gl/RGuILo . Same as below.
+    }, error => callback(new Error(error)))
   }
 
-  /**
-   * No action done at this moment.
+   /**
+   * Return the supported services by this Accessory. This supports
+   * turning the device in and off, and binds the methods for that
+   * accordningly.
    *
-   * @param  {Function} callback Invoked when logging has been done.
-   */
-  identify(callback) {
-    this.log('Identify called.');
-    callback();
-  }
-
-  /**
-   * Return the supported services by this Accessory.
    * @return {Array} An array of services supported by this accessory.
    */
   getServices() {
-    return [this.getControllerService()]
-  }
+    this.log('getServices called')
+    const controllerService = new this.Service.Lightbulb()
 
-  /**
-   * Fetches the controller service for this accessory, whtih
-   * @return {[type]} [description]
-   */
-  getControllerService() {
-    const homebridgeModel = {
-      // Mapping from Telldus models to Homekit devices. Fetch the actual
-      // characteristics and controllerService from the mapping.
-      'selflearning-switch': {
-        controllerService: new this.Service.Lightbulb(),
-        characteristics: [this.Characteristic.On]
-      },
-      'codeswitch': {
-        controllerService: new this.Service.Lightbulb(),
-        characteristics: [this.Characteristic.On]
-      },
-      'selflearning-dimmer': {
-        controllerService: new this.Service.Lightbulb(),
-        characteristics: [
-          this.Characteristic.On, this.Characteristic.Brightness]
-      }
-    }[this.model]
+    controllerService.getCharacteristic(this.Characteristic.On)
+      .on('get', this.getState.bind(this))
+      .on('set', this.setState.bind(this))
 
-    // Use own getters and setters for the different characteristics.
-    homebridgeModel.characteristics
-      .map(ch => homebridgeModel.controllerService.getCharacteristic(ch))
-      .forEach(characteristic => {
-        characteristic.on('get', this.getState.bind(this, characteristic))
-        characteristic.on('set', this.setState.bind(this, characteristic))
-      })
-
-    return homebridgeModel.controllerService;
+    return [controllerService]
   }
 }
 
-module.exports = TelldusAccessory
+class TelldusDimmer extends TelldusSwitch {
+
+  /**
+   * Return the last known state of the telldus device, which could either
+   * be ON or OFF, or DIMMED. When it is dimmed, the dimlevel is present
+   * and that could be used for 
+   *
+   * @param  {Function}           callback       To be invoked when result is
+   *                                             obtained.
+   * @param  {object}             context
+   */
+  getDimLevel(callback, context) {
+    this.log('getDimLevel called')
+    TDtool.device(this.id).then(device => {
+      if (device.dimlevel)
+        return callback(null, bitsToPercentage(parseInt(device.dimlevel)))
+      callback(null, device.lastsentcommand === 'ON' ? 100 : 0)
+    })
+
+  }
+
+  /**
+   * Set the state of this Accessory to the given dim level. This is a value
+   * given between 0 and 100 from Homebridge, that's translated to a value
+   * between 0 and 255 that Telldus prefers.
+   *
+   * @param  {*}                  value          The value to set,
+   *                                             corresponding to the passed
+   *                                             Characteristic
+   * @param  {Function}           callback       To be invoked when result is
+   *                                             obtained.
+   * @param  {object}             context
+   */
+  setDimLevel(value, callback, context) {
+    TDtool.dim(percentageToBits(value), this.id).then(out => {
+      return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
+
+    // FIXME: This does not appear to actually be raising an error to
+    //        Homebridge, check out http://goo.gl/RGuILo . Same as above.
+    }, error => callback(new Error(error)))
+  }
+
+  /**
+   * Return the supported services by this Accessory. This extends what's
+   * been supported by the TelldusSwitch class, and adds a brightness
+   * Characteristic, making it possible to set the brightness of the device.
+   *
+   * @return {Array} An array of services supported by this accessory.
+   */
+  getServices() {
+    const controllerService= super.getServices()[0]
+
+    controllerService.getCharacteristic(this.Characteristic.Brightness)
+      .on('get', this.getDimLevel.bind(this))
+      .on('set', this.setDimLevel.bind(this))
+
+    return [controllerService]
+  }
+}
+
+class TelldusThermometer extends TelldusAccessory {
+
+  /**
+   * Accepts a callback method, and returns the unit of measurement for 
+   * the temperature. Is currently always set to Celcius.
+   */
+  getTemperatureUnits(callback) {
+    this.log("Getting temperature units")
+
+    // 1 = F and 0 = C
+    callback (null, 0)
+  }
+
+  /**
+   * Return the state of the telldus device, which is done by issuing
+   * list-sensors with tdtool.
+   *
+   * @param  {Function}           callback       To be invoked when result is
+   *                                             obtained.
+   * @param  {object}             context
+   */
+  getTemperature(callback, context) {
+    this.log(`Checking temperature...`)
+    TDtool.sensor(this.id, this.log).then(s => {
+      this.log(`Found temperature ${s.temperature}`)
+      callback(null, parseFloat(s.temperature))
+    })
+  }
+
+  /**
+   * Return the supported services by this Accessory. This only supports
+   * fetching of the temperature.
+   *
+   * @return {Array} An array of services supported by this accessory.
+   */
+  getServices() {
+    const controllerService = new this.Service.TemperatureSensor()
+
+    controllerService.getCharacteristic(
+      this.Characteristic.CurrentTemperature
+    ).on('get', this.getTemperature.bind(this))
+
+    return [controllerService]
+  }
+}
+
+module.exports = {
+  TelldusAccessory,
+  TelldusSwitch,
+  TelldusDimmer,
+  TelldusThermometer,
+}
+

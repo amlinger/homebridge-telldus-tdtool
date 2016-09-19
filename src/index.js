@@ -4,15 +4,18 @@ const TDtool = require('./lib/tdtool')
 const {
   TelldusSwitch,
   TelldusDimmer,
+  TelldusHygrometer,
   TelldusThermometer,
+  TelldusThermometerHygrometer,
 } = require('./lib/telldus-accessory')
 
 const modelToAssecoryMap = {
   'selflearning-switch':  TelldusSwitch,
   'codeswitch':           TelldusSwitch,
   'selflearning-dimmer':  TelldusDimmer,
+  'humidity':             TelldusHygrometer,
   'temperature':          TelldusThermometer,
-  'temperaturehumidity':  TelldusThermometer,
+  'temperaturehumidity':  TelldusThermometerHygrometer,
 }
 
 const githubRepo = 'https://github.com/amlinger/homebridge-telldus-tdtool'

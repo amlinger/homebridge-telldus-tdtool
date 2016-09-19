@@ -130,6 +130,13 @@ class TelldusSwitch extends TelldusAccessory {
   }
 }
 
+/**
+ * Wrapper for Telldus dimmers.
+ *
+ * This share the properties of Telldus switches, and can be turned on and
+ * of, as well as set the brightness. This therefore adds the characateristic
+ * for brightness, and the appropriate getters and setters for it.
+ */
 class TelldusDimmer extends TelldusSwitch {
 
   /**
@@ -190,10 +197,55 @@ class TelldusDimmer extends TelldusSwitch {
   }
 }
 
+/**
+ * Wrapper for Telldus hygrometers.
+ *
+ * This is a sensor, and only have the getting possibility of the value.
+ */
+class TelldusHygrometer extends TelldusAccessory {
+
+  /**
+   * Fetches the humidity in the air from the sensor. Accepts a callback
+   * method and returns the value to that method.
+   *
+   * @param  {Function}           callback       To be invoked when result is
+   *                                             obtained.
+   * @param  {object}             context
+   */
+  getHumdity(callback, context) {
+    this.log('Checking humidity...')
+    TDtool.sensor(this.id, this.log).then(s => {
+      this.log(`Found humidity ${s.humidity}%`)
+      callback(null, parseFloat(s.humidity))
+    })
+  }
+
+  /**
+   * Return the supported services by this Accessory. This only supports
+   * fetching of the humidity.
+   *
+   * @return {Array} An array of services supported by this accessory.
+   */
+  getServices() {
+    const controllerService = new this.Service.HumiditySensor()
+
+    controllerService.getCharacteristic(
+      this.Characteristic.CurrentRelativeHumidity
+    ) .on('get', this.getHumdity.bind(this))
+
+    return [controllerService]
+  }
+}
+
+/**
+ * Wrapper for Telldus thermometer.
+ *
+ * This is a sensor, and only have the getting possibility of the value.
+ */
 class TelldusThermometer extends TelldusAccessory {
 
   /**
-   * Accepts a callback method, and returns the unit of measurement for 
+   * Accepts a callback method, and returns the unit of measurement for
    * the temperature. Is currently always set to Celcius.
    */
   getTemperatureUnits(callback) {
@@ -236,10 +288,55 @@ class TelldusThermometer extends TelldusAccessory {
   }
 }
 
+/**
+ * Wrapper for Telldus thermometer and hygrometer.
+ *
+ * This is a sensor, and only have the getting possibility of the values.
+ * It shares the same controller service as the Telldus Thermometer, and
+ * adds a controller service or the Hygrometer.
+ */
+class TelldusThermometerHygrometer extends TelldusThermometer {
+
+  /**
+   * Return the state of the telldus device, which is done by issuing
+   * list-sensors with tdtool.
+   *
+   * @param  {Function}           callback       To be invoked when result is
+   *                                             obtained.
+   * @param  {object}             context
+   */
+  getHumdity(callback, context) {
+    this.log('Checking humidity...')
+    TDtool.sensor(this.id, this.log).then(s => {
+      this.log(`Found humidity ${s.humidity}%`)
+      callback(null, parseFloat(s.humidity))
+    })
+  }
+
+  /**
+   * Return the supported services by this Accessory. This only supports
+   * fetching of the temperature, as well as the humidity.
+   *
+   * @return {Array} An array of services supported by this accessory.
+   */
+  getServices() {
+    const thermoServices = super.getServices(),
+      hygroSensor = new this.Service.HumiditySensor()
+
+    hygroSensor.getCharacteristic(
+      this.Characteristic.CurrentRelativeHumidity
+    ) .on('get', this.getHumdity.bind(this))
+
+    return thermoServices.concat([hygroSensor])
+  }
+}
+
 module.exports = {
   TelldusAccessory,
   TelldusSwitch,
   TelldusDimmer,
+  TelldusHygrometer,
   TelldusThermometer,
+  TelldusThermometerHygrometer,
 }
 

@@ -43,8 +43,7 @@ class TelldusTDToolPlatform {
     }).then(devices => {
       return TDtool.listSensors().then(sensors => {
         this.log(foundOfTypeString('sensor', sensors.length))
-        sensors.forEach((current, index) => {
-          sensors[index].name = 'Thermometer'})
+        sensors.forEach((current, index) => {sensors[index].name = `Thermometer ${current.id}`})
         return devices.concat(sensors)
       })
     }).then(accessories => {

@@ -275,6 +275,9 @@ class TelldusThermometer extends TelldusAccessory {
    * Return the supported services by this Accessory. This only supports
    * fetching of the temperature.
    *
+   * Homebridges default minValue is 0, which can't handle negative temperatures.
+   * We'll set it to -50 which should cover most usecases.
+   *
    * @return {Array} An array of services supported by this accessory.
    */
   getServices() {
@@ -282,6 +285,8 @@ class TelldusThermometer extends TelldusAccessory {
 
     controllerService.getCharacteristic(
       this.Characteristic.CurrentTemperature
+    ).setProps(
+      { minValue: -50 }
     ).on('get', this.getTemperature.bind(this))
 
     return [controllerService]

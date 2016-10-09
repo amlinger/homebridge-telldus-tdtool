@@ -9,7 +9,7 @@ const {
   TelldusThermometerHygrometer,
 } = require('./lib/telldus-accessory')
 
-const modelToAssecoryMap = {
+const modelToAccessoryMap = {
   'selflearning-switch':  TelldusSwitch,
   'codeswitch':           TelldusSwitch,
   'selflearning-dimmer':  TelldusDimmer,
@@ -49,13 +49,13 @@ class TelldusTDToolPlatform {
       })
     }).then(accessories => {
       callback(accessories.map(data => {
-        const Accessory = modelToAssecoryMap[data.model.split(':')[0]]
+        const Accessory = modelToAccessoryMap[data.model.split(':')[0]]
 
         if (Accessory === undefined) {
           this.log(
             `Model "${data.model.split(':')[0]}" is not supported, try ` +
-            `[${Object.keys(modelToAssecoryMap).join(', ')}]. If you still` +
-            `have not found what you're looking for, submit a pull ` + 
+            `[${Object.keys(modelToAccessoryMap).join(', ')}]. If you still` +
+            `have not found what you're looking for, submit a pull ` +
             `at ${githubRepo}`)
             return null
         }
@@ -68,7 +68,7 @@ class TelldusTDToolPlatform {
   }
 }
 
-/*
+/**
  * Register the Telldus tdtool platform as this module.
  */
 module.exports = homebridge => {

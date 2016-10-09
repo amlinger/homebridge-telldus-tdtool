@@ -48,7 +48,12 @@ class TelldusTDToolPlatform {
       })
     }).then(accessories => {
       callback(accessories.map(data => {
-        const Accessory = modelToAccessoryMap[data.model.split(':')[0]]
+        let Accessory = modelToAccessoryMap[data.model.split(':')[0]];
+        // Some ESIC thermometers wrongly identifies themselves as temperaturehumidity and keeps sending 0% humidity.
+        // We identify them by having humidity at zero, and override their type to avoid false sensors in homekit.
+        if (Accessory === TelldusThermometerHygrometer && parseFloat(data.humidity) < 1) {
+          Accessory = TelldusThermometer;
+        }
 
         if (Accessory === undefined) {
           this.log(

@@ -1,4 +1,4 @@
-  'use strict'
+'use strict'
 
 const confParser = require('tellstick.conf-parser')
 

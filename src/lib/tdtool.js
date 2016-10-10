@@ -56,8 +56,9 @@ const TDtool = {
   device: id => TDtool.listDevices().then(
     devices => devices.find(d => d.id === id)),
 
+  // Sensors typically report once a minute, ignore them if they fail for 10 minutes.
   sensor: id => TDtool.listSensors().then(
-    sensors => sensors.find(s => s.id === id)),
+    sensors => sensors.find(s => s.id === id && s.age <= (60 * 10))),
 
   run: (cmd, target) => TDtool.isInstalled().then(() =>
     execute(`tdtool ${cmd} ${target}`)),

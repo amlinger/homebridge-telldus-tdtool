@@ -45,7 +45,7 @@ describe('test', () => {
         expect(accessories).toEqual([])
         expect(log.calls.allArgs()[0][0]).toEqual('Loading devices...')
         expect(log.calls.allArgs()[1][0]).toEqual(
-          'Found no items of type "device".')
+          'Found no items of type "device" from "tdtool --list-devices".')
         done()
       })
     })
@@ -69,7 +69,7 @@ describe('test', () => {
       instance.accessories(accessories => {
         expect(log.calls.allArgs()[0][0]).toEqual('Loading devices...')
         expect(log.calls.allArgs()[1][0]).toEqual(
-          'Found 1 item of type "device".')
+          'Found 1 item of type "device" from "tdtool --list-devices".')
         done()
       })
     })
@@ -111,7 +111,7 @@ describe('test', () => {
         })
         expect(log.calls.allArgs()[0][0]).toEqual('Loading devices...')
         expect(log.calls.allArgs()[1][0]).toEqual(
-          'Found 2 items of type "device".')
+          'Found 2 items of type "device" from "tdtool --list-devices".')
         done()
       })
     })

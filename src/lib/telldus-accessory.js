@@ -6,6 +6,8 @@ const TDtool = require('./tdtool')
 const bitsToPercentage = value => Math.round(value * 100 / 255)
 // Convert 0-100 to 0-255
 const percentageToBits = value => Math.round(value * 255 / 100)
+// Default max age for sensors
+const SENSOR_MAX_AGE_SECONDS = 60 * 60
 
 /**
  * A Telldus Accessory convenience wrapper.
@@ -35,6 +37,7 @@ class TelldusAccessory {
     this.data = data
     this.name = data.name
     this.id = data.id
+    this.config = config
 
     // Split manufacturer and model, which could be defined in the tellstick
     // configuration file as model:manufacturer. If not, fallback to use
@@ -47,6 +50,17 @@ class TelldusAccessory {
     this.log = string => log(`[${this.name}]: ${string}`)
     this.Characteristic = homebridge.hap.Characteristic
     this.Service        = homebridge.hap.Service
+  }
+
+  /**
+   * Return a boolean stating if the senors information is stale or fresh.
+   *
+   * @param sensor
+   * @returns {boolean}
+   */
+  isStale(sensor) {
+    const maxAge = this.data.maxAge || this.config.maxAge || SENSOR_MAX_AGE_SECONDS;
+    return (parseInt(sensor.age) >= parseInt(maxAge));
   }
 
   /**
@@ -218,8 +232,9 @@ class TelldusHygrometer extends TelldusAccessory {
       if (s === undefined) {
         callback(true, null)
       } else {
-        this.log(`Found humidity ${s.humidity}%`)
-        callback(null, parseFloat(s.humidity))
+        const isStale = this.isStale(s)
+        this.log(`Found humidity ${s.humidity}% age ${s.age}s stale:${isStale}`)
+        callback(isStale, parseFloat(s.humidity))
       }
     })
   }
@@ -273,8 +288,9 @@ class TelldusThermometer extends TelldusAccessory {
       if (s === undefined) {
         callback(true, null)
       } else {
-        this.log(`Found temperature ${s.temperature}`)
-        callback(null, parseFloat(s.temperature))
+        const isStale = this.isStale(s)
+        this.log(`Found temperature ${s.temperature} age ${s.age}s stale:${isStale}`)
+        callback(isStale, parseFloat(s.temperature))
       }
     })
   }
@@ -324,8 +340,9 @@ class TelldusThermometerHygrometer extends TelldusThermometer {
       if (s === undefined) {
         callback(true, null)
       } else {
-        this.log(`Found humidity ${s.humidity}%`)
-        callback(null, parseFloat(s.humidity))
+        const isStale = this.isStale(s)
+        this.log(`Found humidity ${s.humidity}% age ${s.age}s stale:${isStale}`)
+        callback(isStale, parseFloat(s.humidity))
       }
     })
   }

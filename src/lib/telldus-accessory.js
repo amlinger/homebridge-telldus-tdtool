@@ -212,7 +212,7 @@ class TelldusHygrometer extends TelldusAccessory {
    *                                             obtained.
    * @param  {object}             context
    */
-  getHumdity(callback, context) {
+  getHumidity(callback, context) {
     this.log('Checking humidity...')
     TDtool.sensor(this.id, this.log).then(s => {
       this.log(`Found humidity ${s.humidity}%`)
@@ -231,7 +231,7 @@ class TelldusHygrometer extends TelldusAccessory {
 
     controllerService.getCharacteristic(
       this.Characteristic.CurrentRelativeHumidity
-    ) .on('get', this.getHumdity.bind(this))
+    ) .on('get', this.getHumidity.bind(this))
 
     return [controllerService]
   }
@@ -310,7 +310,7 @@ class TelldusThermometerHygrometer extends TelldusThermometer {
    *                                             obtained.
    * @param  {object}             context
    */
-  getHumdity(callback, context) {
+  getHumidity(callback, context) {
     this.log('Checking humidity...')
     TDtool.sensor(this.id, this.log).then(s => {
       this.log(`Found humidity ${s.humidity}%`)
@@ -330,7 +330,7 @@ class TelldusThermometerHygrometer extends TelldusThermometer {
 
     hygroSensor.getCharacteristic(
       this.Characteristic.CurrentRelativeHumidity
-    ) .on('get', this.getHumdity.bind(this))
+    ) .on('get', this.getHumidity.bind(this))
 
     return thermoServices.concat([hygroSensor])
   }

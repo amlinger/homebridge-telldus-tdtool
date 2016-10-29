@@ -215,8 +215,12 @@ class TelldusHygrometer extends TelldusAccessory {
   getHumidity(callback, context) {
     this.log('Checking humidity...')
     TDtool.sensor(this.id, this.log).then(s => {
-      this.log(`Found humidity ${s.humidity}%`)
-      callback(null, parseFloat(s.humidity))
+      if (s === undefined) {
+        callback(true, null)
+      } else {
+        this.log(`Found humidity ${s.humidity}%`)
+        callback(null, parseFloat(s.humidity))
+      }
     })
   }
 
@@ -266,8 +270,12 @@ class TelldusThermometer extends TelldusAccessory {
   getTemperature(callback, context) {
     this.log(`Checking temperature...`)
     TDtool.sensor(this.id, this.log).then(s => {
-      this.log(`Found temperature ${s.temperature}`)
-      callback(null, parseFloat(s.temperature))
+      if (s === undefined) {
+        callback(true, null)
+      } else {
+        this.log(`Found temperature ${s.temperature}`)
+        callback(null, parseFloat(s.temperature))
+      }
     })
   }
 
@@ -313,8 +321,12 @@ class TelldusThermometerHygrometer extends TelldusThermometer {
   getHumidity(callback, context) {
     this.log('Checking humidity...')
     TDtool.sensor(this.id, this.log).then(s => {
-      this.log(`Found humidity ${s.humidity}%`)
-      callback(null, parseFloat(s.humidity))
+      if (s === undefined) {
+        callback(true, null)
+      } else {
+        this.log(`Found humidity ${s.humidity}%`)
+        callback(null, parseFloat(s.humidity))
+      }
     })
   }
 

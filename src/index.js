@@ -20,8 +20,8 @@ const modelToAccessoryMap = {
 
 const githubRepo = 'https://github.com/amlinger/homebridge-telldus-tdtool'
 
-const foundOfTypeString = (type, length) =>
-  `Found ${length || 'no'} item${length != 1 ? 's' : ''} of type "${type}".`
+const foundOfTypeString = (type, length, source) =>
+  `Found ${length || 'no'} item${length != 1 ? 's' : ''} of type "${type}" from "${source}".`
 
 /**
  * Platform wrapper that fetches the accessories connected to the
@@ -38,22 +38,27 @@ class TelldusTDToolPlatform {
     this.log('Loading devices...')
     TDtool.listDevices().then(deviceCandidates => {
       const devices = deviceCandidates.filter(d => d.type === 'device')
-      this.log(foundOfTypeString('device', devices.length))
+      this.log(foundOfTypeString('device', devices.length, 'tdtool --list-devices'))
       return devices
     }).then(devices => {
-      return TDtool.listSensors().then(sensors => {
-        this.log(foundOfTypeString('sensor', sensors.length))
-        sensors.forEach((current, index) => {sensors[index].name = `Thermometer ${current.id}`})
-        return devices.concat(sensors)
-      })
+      if (this.config.sensors !== undefined && this.config.sensors.length > 0) {
+        this.log(foundOfTypeString('sensor', this.config.sensors.length, 'config.json'))
+        this.config.sensors.forEach((current, index) => {
+          if (this.config.sensors[index].name === undefined) {
+            this.config.sensors[index].name = `Sensor ${current.id}`;
+          }
+        })
+        return devices.concat(this.config.sensors);
+      } else {
+        return TDtool.listSensors().then(sensors => {
+          this.log(foundOfTypeString('sensor', sensors.length, 'tdtool --list-sensors'))
+          sensors.forEach((current, index) => {sensors[index].name = `Thermometer ${current.id}`})
+          return devices.concat(sensors)
+        })
+      }
     }).then(accessories => {
       callback(accessories.map(data => {
-        let Accessory = modelToAccessoryMap[data.model.split(':')[0]];
-        // Some ESIC thermometers wrongly identifies themselves as temperaturehumidity and keeps sending 0% humidity.
-        // We identify them by having humidity at zero, and override their type to avoid false sensors in homekit.
-        if (Accessory === TelldusThermometerHygrometer && parseFloat(data.humidity) < 1) {
-          Accessory = TelldusThermometer;
-        }
+        const Accessory = modelToAccessoryMap[data.model.split(':')[0]];
 
         if (Accessory === undefined) {
           this.log(

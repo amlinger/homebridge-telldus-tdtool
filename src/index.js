@@ -21,7 +21,8 @@ const modelToAccessoryMap = {
 const githubRepo = 'https://github.com/amlinger/homebridge-telldus-tdtool'
 
 const foundOfTypeString = (type, length, source) =>
-  `Found ${length || 'no'} item${length != 1 ? 's' : ''} of type "${type}" from "${source}".`
+  `Found ${length || 'no'} item${length != 1 ? 's' : ''} of type "${type}"` +
+  ` from "${source}".`
 
 /**
  * Platform wrapper that fetches the accessories connected to the
@@ -38,35 +39,40 @@ class TelldusTDToolPlatform {
     this.log('Loading devices...')
     TDtool.listDevices().then(deviceCandidates => {
       const devices = deviceCandidates.filter(d => d.type === 'device')
-      this.log(foundOfTypeString('device', devices.length, 'tdtool --list-devices'))
+      this.log(foundOfTypeString(
+            'device', devices.length, 'tdtool --list-devices'))
       return devices
     }).then(devices => {
       if (this.config.sensors !== undefined && this.config.sensors.length > 0) {
-        this.log(foundOfTypeString('sensor', this.config.sensors.length, 'config.json'))
+        this.log(foundOfTypeString(
+              'sensor', this.config.sensors.length, 'config.json'))
         this.config.sensors.forEach((current, index) => {
           if (this.config.sensors[index].name === undefined) {
-            this.config.sensors[index].name = `Sensor ${current.id}`;
+            this.config.sensors[index].name = `Sensor ${current.id}`
           }
         })
-        return devices.concat(this.config.sensors);
+        return devices.concat(this.config.sensors)
       } else {
         return TDtool.listSensors().then(sensors => {
-          this.log(foundOfTypeString('sensor', sensors.length, 'tdtool --list-sensors'))
-          sensors.forEach((current, index) => {sensors[index].name = `Thermometer ${current.id}`})
+          this.log(foundOfTypeString('sensor', sensors.length,
+                'tdtool --list-sensors'))
+          sensors.forEach((current, index) => {
+            sensors[index].name = `Thermometer ${current.id}`
+          })
           return devices.concat(sensors)
         })
       }
     }).then(accessories => {
       callback(accessories.map(data => {
-        const Accessory = modelToAccessoryMap[data.model.split(':')[0]];
+        const Accessory = modelToAccessoryMap[data.model.split(':')[0]]
 
         if (Accessory === undefined) {
           this.log(
             `Model "${data.model.split(':')[0]}" is not supported, try ` +
             `[${Object.keys(modelToAccessoryMap).join(', ')}]. If you still` +
-            `have not found what you're looking for, submit a pull ` +
+            'have not found what you\'re looking for, submit a pull ' +
             `at ${githubRepo}`)
-            return null
+          return null
         }
 
         return new Accessory(data, this.log, this.homebridge, this.config)
@@ -82,5 +88,5 @@ class TelldusTDToolPlatform {
  */
 module.exports = homebridge => {
   homebridge.registerPlatform(
-    'homebridge-telldus-tdtool', "Telldus-TD-Tool", TelldusTDToolPlatform)
-};
+    'homebridge-telldus-tdtool', 'Telldus-TD-Tool', TelldusTDToolPlatform)
+}

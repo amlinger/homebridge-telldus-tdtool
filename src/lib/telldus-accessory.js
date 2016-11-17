@@ -134,7 +134,7 @@ class TelldusSwitch extends TelldusAccessory {
    */
   getServices() {
     this.log('getServices called')
-    const controllerService = new this.Service.Lightbulb()
+    const controllerService = new this.Service.Lightbulb(this.name)
 
     controllerService.getCharacteristic(this.Characteristic.On)
       .on('get', this.getState.bind(this))
@@ -246,7 +246,7 @@ class TelldusHygrometer extends TelldusAccessory {
    * @return {Array} An array of services supported by this accessory.
    */
   getServices() {
-    const controllerService = new this.Service.HumiditySensor()
+    const controllerService = new this.Service.HumiditySensor(this.name)
 
     controllerService.getCharacteristic(
       this.Characteristic.CurrentRelativeHumidity
@@ -305,7 +305,7 @@ class TelldusThermometer extends TelldusAccessory {
    * @return {Array} An array of services supported by this accessory.
    */
   getServices() {
-    const controllerService = new this.Service.TemperatureSensor()
+    const controllerService = new this.Service.TemperatureSensor(this.name)
 
     controllerService.getCharacteristic(
       this.Characteristic.CurrentTemperature
@@ -355,7 +355,7 @@ class TelldusThermometerHygrometer extends TelldusThermometer {
    */
   getServices() {
     const thermoServices = super.getServices(),
-      hygroSensor = new this.Service.HumiditySensor()
+      hygroSensor = new this.Service.HumiditySensor(this.name)
 
     hygroSensor.getCharacteristic(
       this.Characteristic.CurrentRelativeHumidity

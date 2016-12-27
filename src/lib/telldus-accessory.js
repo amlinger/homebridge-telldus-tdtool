@@ -182,7 +182,6 @@ class TelldusDimmer extends TelldusSwitch {
     TDtool.device(this.id).then(device => {
       if (device.dimlevel){
         this.dimlevel = bitsToPercentage(parseInt(device.dimlevel))
-        return callback(null, this.dimlevel)
       }
       callback(null, this.dimlevel)
     })
@@ -208,9 +207,10 @@ class TelldusDimmer extends TelldusSwitch {
         // FIXME: This does not appear to actually be raising an error to
         //        Homebridge, check out http://goo.gl/RGuILo . Same as above.
       }, error => callback(new Error(error)))
-    }
+    } else {
     // Turn the dimmer of by using the super switch function
-    super.setState(false, callback, context)
+      super.setState(false, callback, context)
+    }
   }
 
   /**
@@ -228,7 +228,7 @@ class TelldusDimmer extends TelldusSwitch {
   setDimLevel(value, callback, context) {
     this.log('setDimLevel called')
     this.dimlevel = value
-    this.setState(this.dimlevel > 0 ? true : false, callback, context)
+    this.setState(this.dimlevel > 0, callback, context)
   }
 
   /**

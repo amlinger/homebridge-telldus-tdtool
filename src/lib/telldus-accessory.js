@@ -115,7 +115,7 @@ class TelldusSwitch extends TelldusAccessory {
    * @param  {object}             context
    */
   setState(value, callback, context) {
-    this.log(`Recieved set state request: [${value ? 'on' : 'off'}]`)
+    this.log(`Recieved set state request for switch: [${value ? 'on' : 'off'}]`)
 
     TDtool[value ? 'on' : 'off'](this.id).then(out => {
       return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
@@ -153,6 +153,20 @@ class TelldusSwitch extends TelldusAccessory {
  */
 class TelldusDimmer extends TelldusSwitch {
 
+
+  /**
+   * Telldus Dimmer constructor.
+   * 
+   * We need dimmers to keep track of the dim level because iOS 10 seems to not
+   * keep track of the correct dimlevel. Some times it only sends on/off commands, 
+   * and it seems more correct to set the previous dimlevel than to always revert to 
+   * max light when clicking the accessory in the iOS 10 control center.
+   */
+  constructor(data, log, homebridge, config) {
+    super(data, log, homebridge, config)
+    this.dimlevel = 0
+  }
+
   /**
    * Return the last known state of the telldus device, which could either
    * be ON or OFF, or DIMMED. When it is dimmed, the dimlevel is present
@@ -164,12 +178,39 @@ class TelldusDimmer extends TelldusSwitch {
    */
   getDimLevel(callback, context) {
     this.log('getDimLevel called')
+    
     TDtool.device(this.id).then(device => {
-      if (device.dimlevel)
-        return callback(null, bitsToPercentage(parseInt(device.dimlevel)))
-      callback(null, device.lastsentcommand === 'ON' ? 100 : 0)
+      if (device.dimlevel){
+        this.dimlevel = bitsToPercentage(parseInt(device.dimlevel))
+      }
+      callback(null, this.dimlevel)
     })
+  }
 
+  /**
+   * Set the state of this Accessory. This accepts a value that is either
+   * true or false, for turning the dimmer off or on to previous set dimmer level.
+   *
+   * @param  {*}                  value          The value to set,
+   *                                             corresponding to the passed
+   *                                             Characteristic
+   * @param  {Function}           callback       To be invoked when result is
+   *                                             obtained.
+   * @param  {object}             context
+   */
+  setState(value, callback, context) {
+    this.log(`Recieved set state request for dimmer: [${value ? 'on' : 'off'}]`)
+    if (value && this.dimlevel > 0){
+      TDtool.dim(percentageToBits(this.dimlevel), this.id).then(out => {
+        return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
+
+        // FIXME: This does not appear to actually be raising an error to
+        //        Homebridge, check out http://goo.gl/RGuILo . Same as above.
+      }, error => callback(new Error(error)))
+    } else {
+    // Turn the dimmer of by using the super switch function
+      super.setState(false, callback, context)
+    }
   }
 
   /**
@@ -185,12 +226,9 @@ class TelldusDimmer extends TelldusSwitch {
    * @param  {object}             context
    */
   setDimLevel(value, callback, context) {
-    TDtool.dim(percentageToBits(value), this.id).then(out => {
-      return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
-
-    // FIXME: This does not appear to actually be raising an error to
-    //        Homebridge, check out http://goo.gl/RGuILo . Same as above.
-    }, error => callback(new Error(error)))
+    this.log('setDimLevel called')
+    this.dimlevel = value
+    this.setState(this.dimlevel > 0, callback, context)
   }
 
   /**

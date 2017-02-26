@@ -49,6 +49,48 @@ like the following when you have added this platform:
 }
 ```
 
+#### Configuring sensors
+By default, this plugin will use all sensors available from your Telldus tool,
+listed by `tdtool --list-sensors`. However, this will not allow you to either
+specify the name of the sensor, or filter out sensors that you would not like
+to be present in HomeKit.
+
+By specifying a list of sensors this overrides the found sensors by `tdtool`.
+
+```json
+{
+  "platform" : "Telldus-TD-Tool",
+  "name" : "Telldus-TD-Tool",
+  "sensors" : [{
+    "id": "123",
+    "name": "some-name",
+    "model": "sensor-model",
+    "maxAge": 12,
+
+  }]
+}
+```
+
+Below is the supported attributes for the sensor list.
+
+| Attribute |    Default     | Description                                     |
+|:---------:|:--------------:|:------------------------------------------------|
+|   `id`    |   _Required_   | ID as listed in `tdtool --list-sensors`         |
+|  `name`   | `Sensor ${id}` | Name to show in HomeKit                         |
+|  `model`  |   _Required_   | See below for supported models                  |
+| `maxAge`  |     `3600`     | Seconds from last update until considered stale |
+
+#### Supported accessories
+
+|         Model         |           Backed by            |
+|:---------------------:|:------------------------------:|
+| `selflearning-switch` |        `TelldusSwitch`         |
+|     `codeswitch`      |        `TelldusSwitch`         |
+| `selflearning-dimmer` |        `TelldusDimmer`         |
+|      `humidity`       |      `TelldusHygrometer`       |
+|     `temperature`     |      `TelldusThermometer`      |
+| `temperaturehumidity` | `TelldusThermometerHygrometer` |
+
 ### Building it yourself
 
 This module is written in ES6. To support earlier versions of Node, this is

@@ -3,7 +3,7 @@
 # Homebridge Telldus tdtool
 
 A [Homebridge](Homebridge) plugin for TellStick without Telldus Live,
-interfaced with the CLI tool [`tdtool`](tdtool). This will therefore
+interfaced with the CLI tool tdtool. This will therefore
 require `tdtool` to be present, and runnable, on your server running
 Homebridge.
 

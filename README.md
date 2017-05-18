@@ -1,9 +1,9 @@
-[![Build Status](https://travis-ci.org/amlinger/homebridge-telldus-tdtool.svg?branch=master)](TravisBuild)
+[![Build Status](https://travis-ci.org/amlinger/homebridge-telldus-tdtool.svg?branch=master)][TravisBuild]
 
 # Homebridge Telldus tdtool
 
-A [Homebridge](Homebridge) plugin for TellStick without Telldus Live,
-interfaced with the CLI tool [`tdtool`](tdtool). This will therefore
+A [Homebridge] plugin for TellStick without Telldus Live,
+interfaced with the CLI tool [`tdtool`][tdtool]. This will therefore
 require `tdtool` to be present, and runnable, on your server running
 Homebridge.
 
@@ -11,7 +11,7 @@ Homebridge.
 
 Since it relies on `telldus-core`, only TellStick Duo and TellStick are
 supported. TellStick net will support `telldus-core`,
-[eventually](TellStickCompability).
+[eventually][TellStickCompability].
 
 ## Installation
 
@@ -125,7 +125,7 @@ Default values for these are:
 To run this, it assumes a couple of things:
 1. It assumes you have `fswatch` and `rsync` installed.
 2. You have SSH keys set up for your host.
-3. You are running Homebridge using the [systemd method](SystemdMethod).
+3. You are running Homebridge using the [systemd method].
 
 ## Dependencies & Trade-offs
 This plugin depends on `tellstick.conf-parser`. This is because `tdtool` does
@@ -147,4 +147,4 @@ The links below are used for referencing above.
 [tdtool]: http://developer.telldus.se/doxygen/
 [Homebridge]: https://github.com/nfarina/homebridge
 [TellStickCompability]: http://developer.telldus.se/
-[SystemdMethod]: http://goo.gl/RQPvpn
+[systemd method]: http://goo.gl/RQPvpn

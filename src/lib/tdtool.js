@@ -27,15 +27,15 @@ const deviceStringToObjects = deviceString =>
  * Wrapper for CMD interaction with
  * @type {Object}
  */
-const TDtool = {
-  isInstalled: () => execute('command -v tdtool').then(res =>
-    (res !== '') ? Promise.resolve() : Promise.reject(
-      '"tdtool" does not seem to be installed, but is required by this plugin.'
-    )
-  ),
+class TDtool {
+  isInstalled() {
+    return execute('command -v tdtool').then(res => {
+      (res !== '') ? Promise.resolve() : Promise.reject(
+        '"tdtool" does not seem to be installed, but is required by this plugin.')})
+  }
 
-  listDevices: () => {
-    return TDtool.isInstalled().then(() =>
+  listDevices() {
+    return this.isInstalled().then(() =>
       execute('tdtool --list-devices')
     ).then(deviceString => {
       return confParser.parse('/etc/tellstick.conf').then(conf => {
@@ -44,23 +44,29 @@ const TDtool = {
             conf.devices.find(confDev => confDev.id === device.id), device))
       })
     })
-  },
+  }
 
-  listSensors: () => {
-    return TDtool.isInstalled().then(() =>
+  listSensors() {
+    return this.isInstalled().then(() =>
       execute('tdtool --list-sensors')
     ).then(deviceString =>
       deviceStringToObjects(deviceString))
-  },
+  }
 
-  device: id => TDtool.listDevices().then(
-    devices => devices.find(d => d.id === id)),
+  device(id) {
+    return this.listDevices().then(
+      devices => devices.find(d => d.id === id))
+  }
 
-  sensor: id => TDtool.listSensors().then(
-    sensors => sensors.find(s => s.id === id)),
+  sensor(id) {
+    return this.listSensors().then(
+      sensors => sensors.find(s => s.id === id))
+  }
 
-  run: (cmd, target) => TDtool.isInstalled().then(() =>
-    execute(`tdtool ${cmd} ${target}`)),
+  run(cmd, target) {
+    return this.isInstalled().then(() =>
+      execute(`tdtool ${cmd} ${target}`))
+  }
 
   /**
    * Shorthand methods for running a command on a Device with the given
@@ -70,10 +76,12 @@ const TDtool = {
    * @param  {[type]} '--on' [description]
    * @return {[type]}        [description]
    */
-  on:  id => TDtool.run('--on', id),
-  off: id => TDtool.run('--off', id),
-  dim: (level, id) => TDtool.isInstalled().then(() =>
-      execute(`tdtool --dimlevel ${level} --dim ${id}`)),
+  on(id) { return this.run('--on', id) }
+  off(id) { return this.run('--off', id) }
+  dim(level, id) {
+    return this.isInstalled().then(() =>
+      execute(`tdtool --dimlevel ${level} --dim ${id}`))
+  }
 }
 
-module.exports = TDtool
+module.exports = { TDtool }

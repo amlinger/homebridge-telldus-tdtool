@@ -1,7 +1,5 @@
 'use strict'
 
-const TDtool = require('./tdtool')
-
 // Convert 0-255 to 0-100
 const bitsToPercentage = value => Math.round(value * 100 / 255)
 // Convert 0-100 to 0-255
@@ -33,8 +31,9 @@ class TelldusAccessory {
    * @param  {object}  config     Configuration object passed on from initial
    *                              instantiation.
    */
-  constructor(data, log, homebridge, config) {
+  constructor(data, log, tdtool, homebridge, config) {
     this.data = data
+    this.tdtool = tdtool
     this.name = data.name
     this.id = data.id
     this.config = config
@@ -94,7 +93,7 @@ class TelldusSwitch extends TelldusAccessory {
    * @param  {object}             context
    */
   getState(callback, context) {
-    TDtool.device(this.id).then(device => {
+    this.tdtool.device(this.id).then(device => {
       // For this to be applicable for the dimmer as well as the switches, it
       // is crucial that we are comparing with OFF and not with ON. This is
       // because when OFF is the last sent command, the device is actually
@@ -118,7 +117,7 @@ class TelldusSwitch extends TelldusAccessory {
   setState(value, callback, context) {
     this.log(`Recieved set state request for switch: [${value ? 'on' : 'off'}]`)
 
-    TDtool[value ? 'on' : 'off'](this.id).then(out => {
+    this.tdtool[value ? 'on' : 'off'](this.id).then(out => {
       return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
 
       // FIXME: This does not appear to actually be raising an error to
@@ -164,8 +163,8 @@ class TelldusDimmer extends TelldusSwitch {
    * always revert to max light when clicking the accessory in the iOS 10
    * control center.
    */
-  constructor(data, log, homebridge, config) {
-    super(data, log, homebridge, config)
+  constructor(data, log, tdtool, homebridge, config) {
+    super(data, log, tdtool, homebridge, config)
     this.dimlevel = 0
   }
 
@@ -181,7 +180,7 @@ class TelldusDimmer extends TelldusSwitch {
   getDimLevel(callback, context) {
     this.log('getDimLevel called')
 
-    TDtool.device(this.id).then(device => {
+    this.tdtool.device(this.id).then(device => {
       if (device.dimlevel){
         this.dimlevel = bitsToPercentage(parseInt(device.dimlevel))
       }
@@ -204,7 +203,7 @@ class TelldusDimmer extends TelldusSwitch {
   setState(value, callback, context) {
     this.log(`Recieved set state request for dimmer: [${value ? 'on' : 'off'}]`)
     if (value && this.dimlevel > 0){
-      TDtool.dim(percentageToBits(this.dimlevel), this.id).then(out => {
+      this.tdtool.dim(percentageToBits(this.dimlevel), this.id).then(out => {
         return out.indexOf('Success') > -1 ? callback() : Promise.reject(out)
 
         // FIXME: This does not appear to actually be raising an error to
@@ -269,7 +268,7 @@ class TelldusHygrometer extends TelldusAccessory {
    */
   getHumidity(callback, context) {
     this.log('Checking humidity...')
-    TDtool.sensor(this.id, this.log).then(s => {
+    this.tdtool.sensor(this.id, this.log).then(s => {
       if (s === undefined) {
         callback(true, null)
       } else {
@@ -325,7 +324,7 @@ class TelldusThermometer extends TelldusAccessory {
    */
   getTemperature(callback, context) {
     this.log('Checking temperature...')
-    TDtool.sensor(this.id, this.log).then(s => {
+    this.tdtool.sensor(this.id, this.log).then(s => {
       if (s === undefined) {
         callback(true, null)
       } else {
@@ -378,7 +377,7 @@ class TelldusThermometerHygrometer extends TelldusThermometer {
    */
   getHumidity(callback, context) {
     this.log('Checking humidity...')
-    TDtool.sensor(this.id, this.log).then(s => {
+    this.tdtool.sensor(this.id, this.log).then(s => {
       if (s === undefined) {
         callback(true, null)
       } else {
@@ -415,4 +414,3 @@ module.exports = {
   TelldusThermometer,
   TelldusThermometerHygrometer,
 }
-

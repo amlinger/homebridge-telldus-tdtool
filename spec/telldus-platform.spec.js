@@ -2,6 +2,19 @@
 
 const proxyquire = require('proxyquire')
 
+/*
+ * Method for creating a class with the mocked methods passed as
+ * arguments.
+ */
+const mockClass = (mocked) => (
+  class _Mock {
+    constructor() {
+      Object.keys(mocked).forEach(m => {
+        this[m] = mocked[m]
+      })
+    }
+  })
+
 describe('test', () => {
   let instance, log, homebridgeInjector
 
@@ -25,10 +38,13 @@ describe('test', () => {
     registerInjector({
       'tellstick-confparser': jasmine.createSpy(),
       './lib/tdtool': {
-        listDevices: jasmine.createSpy().and.returnValue(null),
+        TDtool: mockClass({
+          listDevices: jasmine.createSpy().and.returnValue(null),
+        })
       }
     })
-    expect(Object.keys(instance)).toEqual(['log', 'config', 'homebridge'])
+    expect(Object.keys(instance)).toEqual([
+      'log', 'config', 'homebridge', 'tdTool'])
   })
 
   describe('#accessories', () => {
@@ -36,8 +52,10 @@ describe('test', () => {
       registerInjector({
         'tellstick-confparser': jasmine.createSpy(),
         './lib/tdtool': {
-          listDevices: jasmine.createSpy().and.returnValue(Promise.resolve([])),
-          listSensors: jasmine.createSpy().and.returnValue(Promise.resolve([])),
+          TDtool: mockClass({
+            listDevices: jasmine.createSpy().and.returnValue(Promise.resolve([])),
+            listSensors: jasmine.createSpy().and.returnValue(Promise.resolve([])),
+          })
         }
       })
 
@@ -59,10 +77,12 @@ describe('test', () => {
       registerInjector({
         'tellstick-confparser': jasmine.createSpy(),
         './lib/tdtool': {
-          listDevices: jasmine.createSpy().and.returnValue(
-            Promise.resolve(devices)),
-          device: jasmine.createSpy().and.callFake(id =>
-            Promise.resolve(devices.find(d => d.id === id)))
+          TDtool: mockClass({
+            listDevices: jasmine.createSpy().and.returnValue(
+              Promise.resolve(devices)),
+            device: jasmine.createSpy().and.callFake(id =>
+              Promise.resolve(devices.find(d => d.id === id)))
+          })
         }
       })
 
@@ -96,11 +116,13 @@ describe('test', () => {
       registerInjector({
         'tellstick-confparser': jasmine.createSpy(),
         './lib/tdtool': {
-          listDevices: jasmine.createSpy().and.returnValue(
-            Promise.resolve(devices)),
-          device: jasmine.createSpy().and.callFake(id =>
-            Promise.resolve(devices.find(d => d.id === id))),
-          listSensors: jasmine.createSpy().and.returnValue(Promise.resolve([]))
+          TDtool: mockClass({
+            listDevices: jasmine.createSpy().and.returnValue(
+              Promise.resolve(devices)),
+            device: jasmine.createSpy().and.callFake(id =>
+              Promise.resolve(devices.find(d => d.id === id))),
+            listSensors: jasmine.createSpy().and.returnValue(Promise.resolve([]))
+          })
         }
       })
 

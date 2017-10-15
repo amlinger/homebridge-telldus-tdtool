@@ -1,6 +1,6 @@
 'use strict'
 
-const TDtool = require('./lib/tdtool')
+const {TDtool} = require('./lib/tdtool')
 const {
   TelldusSwitch,
   TelldusDimmer,
@@ -33,11 +33,12 @@ class TelldusTDToolPlatform {
     this.log = log
     this.config = config
     this.homebridge = homebridge
+    this.tdTool = new TDtool()
   }
 
   accessories(callback) {
     this.log('Loading devices...')
-    TDtool.listDevices().then(deviceCandidates => {
+    this.tdTool.listDevices().then(deviceCandidates => {
       const devices = deviceCandidates.filter(d => d.type === 'device')
       this.log(foundOfTypeString(
             'device', devices.length, 'tdtool --list-devices'))
@@ -53,7 +54,7 @@ class TelldusTDToolPlatform {
         })
         return devices.concat(this.config.sensors)
       } else {
-        return TDtool.listSensors().then(sensors => {
+        return this.tdTool.listSensors().then(sensors => {
           this.log(foundOfTypeString('sensor', sensors.length,
                 'tdtool --list-sensors'))
           sensors.forEach((current, index) => {
@@ -75,7 +76,7 @@ class TelldusTDToolPlatform {
           return null
         }
 
-        return new Accessory(data, this.log, this.homebridge, this.config)
+        return new Accessory(data, this.log, this.tdTool, this.homebridge, this.config)
       }).filter(
         accessory => accessory != null
       ))

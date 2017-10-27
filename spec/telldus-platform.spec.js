@@ -3,9 +3,9 @@
 const proxyquire = require('proxyquire')
 
 describe('test', () => {
-  let instance, log, injector, homebridgeInjector, tdMocks
+  let instance, log, homebridgeInjector
 
-  const registerInjector = (mocks) => {
+  const registerInjector = mocks => {
     homebridgeInjector = proxyquire('../src/index', mocks)
 
     log = jasmine.createSpy()

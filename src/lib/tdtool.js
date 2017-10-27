@@ -5,7 +5,7 @@ const confParser = require('tellstick.conf-parser')
 const LINE_DELIMETER = '\n'
 const PAIR_DELIMETER = '\t'
 
-const exec = require('child_process').exec;
+const exec = require('child_process').exec
 
 const execute = cmd => new Promise((resolve, reject) => {
   exec(cmd, (err, stdout, stderr) => err ? reject(stderr) : resolve(stdout))})

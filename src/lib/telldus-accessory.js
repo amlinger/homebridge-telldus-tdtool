@@ -22,7 +22,7 @@ class TelldusAccessory {
   /**
    * Setup data for accessory, and inject everything used by the class.
    *
-   * Dependency injection is used here for easier testing, and avoiding 
+   * Dependency injection is used here for easier testing, and avoiding
    * global imports at the top of the file as we don't know anything about
    * Service, Characteristic and other Homebridge things that are injected
    * into exported provider function.
@@ -59,12 +59,13 @@ class TelldusAccessory {
    * @returns {boolean}
    */
   isStale(sensor) {
-    const maxAge = this.data.maxAge || this.config.maxAge || SENSOR_MAX_AGE_SECONDS;
-    return (parseInt(sensor.age) >= parseInt(maxAge));
+    const maxAge = this.data.maxAge || this.config.maxAge
+                                    || SENSOR_MAX_AGE_SECONDS
+    return (parseInt(sensor.age) >= parseInt(maxAge))
   }
 
   /**
-   * This is a noop action by default, but make sure to log that's been 
+   * This is a noop action by default, but make sure to log that's been
    * called.
    *
    * @param  {Function} callback Invoked when logging has been done.
@@ -156,11 +157,12 @@ class TelldusDimmer extends TelldusSwitch {
 
   /**
    * Telldus Dimmer constructor.
-   * 
+   *
    * We need dimmers to keep track of the dim level because iOS 10 seems to not
-   * keep track of the correct dimlevel. Some times it only sends on/off commands, 
-   * and it seems more correct to set the previous dimlevel than to always revert to 
-   * max light when clicking the accessory in the iOS 10 control center.
+   * keep track of the correct dimlevel. Some times it only sends on/off
+   * commands, and it seems more correct to set the previous dimlevel than to
+   * always revert to max light when clicking the accessory in the iOS 10
+   * control center.
    */
   constructor(data, log, homebridge, config) {
     super(data, log, homebridge, config)
@@ -170,7 +172,7 @@ class TelldusDimmer extends TelldusSwitch {
   /**
    * Return the last known state of the telldus device, which could either
    * be ON or OFF, or DIMMED. When it is dimmed, the dimlevel is present
-   * and that could be used for 
+   * and that could be used for
    *
    * @param  {Function}           callback       To be invoked when result is
    *                                             obtained.
@@ -178,7 +180,7 @@ class TelldusDimmer extends TelldusSwitch {
    */
   getDimLevel(callback, context) {
     this.log('getDimLevel called')
-    
+
     TDtool.device(this.id).then(device => {
       if (device.dimlevel){
         this.dimlevel = bitsToPercentage(parseInt(device.dimlevel))
@@ -189,7 +191,8 @@ class TelldusDimmer extends TelldusSwitch {
 
   /**
    * Set the state of this Accessory. This accepts a value that is either
-   * true or false, for turning the dimmer off or on to previous set dimmer level.
+   * true or false, for turning the dimmer off or on to previous set dimmer
+   * level.
    *
    * @param  {*}                  value          The value to set,
    *                                             corresponding to the passed
@@ -306,7 +309,7 @@ class TelldusThermometer extends TelldusAccessory {
    * the temperature. Is currently always set to Celcius.
    */
   getTemperatureUnits(callback) {
-    this.log("Getting temperature units")
+    this.log('Getting temperature units')
 
     // 1 = F and 0 = C
     callback (null, 0)
@@ -321,13 +324,14 @@ class TelldusThermometer extends TelldusAccessory {
    * @param  {object}             context
    */
   getTemperature(callback, context) {
-    this.log(`Checking temperature...`)
+    this.log('Checking temperature...')
     TDtool.sensor(this.id, this.log).then(s => {
       if (s === undefined) {
         callback(true, null)
       } else {
         const isStale = this.isStale(s)
-        this.log(`Found temperature ${s.temperature} age ${s.age}s stale:${isStale}`)
+        this.log(`Found temperature ${s.temperature} age ${s.age}s ` +
+                 `stale:${isStale}`)
         callback(isStale, parseFloat(s.temperature))
       }
     })
@@ -337,8 +341,8 @@ class TelldusThermometer extends TelldusAccessory {
    * Return the supported services by this Accessory. This only supports
    * fetching of the temperature.
    *
-   * Homebridges default minValue is 0, which can't handle negative temperatures.
-   * We'll set it to -50 which should cover most usecases.
+   * Homebridges default minValue is 0, which can't handle negative
+   * temperatures. We'll set it to -50 which should cover most usecases.
    *
    * @return {Array} An array of services supported by this accessory.
    */

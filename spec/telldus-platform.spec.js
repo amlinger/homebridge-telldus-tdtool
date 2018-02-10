@@ -39,6 +39,7 @@ describe('test', () => {
       'tellstick-confparser': jasmine.createSpy(),
       './lib/tdtool': {
         TDtool: mockClass({
+          isInstalled: () => Promise.resolve(),
           listDevices: jasmine.createSpy().and.returnValue(null),
         })
       }
@@ -53,6 +54,7 @@ describe('test', () => {
         'tellstick-confparser': jasmine.createSpy(),
         './lib/tdtool': {
           TDtool: mockClass({
+            isInstalled: () => Promise.resolve(),
             listDevices: jasmine.createSpy().and.returnValue(Promise.resolve([])),
             listSensors: jasmine.createSpy().and.returnValue(Promise.resolve([])),
           })
@@ -78,6 +80,7 @@ describe('test', () => {
         'tellstick-confparser': jasmine.createSpy(),
         './lib/tdtool': {
           TDtool: mockClass({
+            isInstalled: () => Promise.resolve(),
             listDevices: jasmine.createSpy().and.returnValue(
               Promise.resolve(devices)),
             device: jasmine.createSpy().and.callFake(id =>
@@ -117,6 +120,7 @@ describe('test', () => {
         'tellstick-confparser': jasmine.createSpy(),
         './lib/tdtool': {
           TDtool: mockClass({
+            isInstalled: () => Promise.resolve(),
             listDevices: jasmine.createSpy().and.returnValue(
               Promise.resolve(devices)),
             device: jasmine.createSpy().and.callFake(id =>

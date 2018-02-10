@@ -33,12 +33,15 @@ class TelldusTDToolPlatform {
     this.log = log
     this.config = config
     this.homebridge = homebridge
-    this.tdTool = new TDtool()
+    this.tdTool = new TDtool(log)
   }
 
   accessories(callback) {
     this.log('Loading devices...')
-    this.tdTool.listDevices().then(deviceCandidates => {
+
+    this.tdTool.isInstalled().then(() => {
+      return this.tdTool.listDevices()
+    }).then(deviceCandidates => {
       const devices = deviceCandidates.filter(d => d.type === 'device')
       this.log(foundOfTypeString(
             'device', devices.length, 'tdtool --list-devices'))
@@ -80,7 +83,12 @@ class TelldusTDToolPlatform {
       }).filter(
         accessory => accessory != null
       ))
-    }, error => callback(new Error(error)))
+    }, error => {
+      // If an error occurs, we can log it and return an empty set of
+      // accessories to not crash homebridge for other plugins.
+      this.log(`An error happened, stopped looking for devices: ${error}`)
+      callback([])
+    })
   }
 }
 

@@ -33,7 +33,7 @@ class TelldusTDToolPlatform {
     this.log = log
     this.config = config
     this.homebridge = homebridge
-    this.tdTool = new TDtool(log)
+    this.tdTool = new TDtool(log, config.tdtool)
   }
 
   accessories(callback) {

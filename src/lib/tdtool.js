@@ -2,6 +2,10 @@
 
 const confParser = require('tellstick.conf-parser')
 
+const DEFAULT_CONFIGURATION = {
+  tellstickConfLocation: '/etc/tellstick.conf',
+}
+
 const LINE_DELIMETER = '\n'
 const PAIR_DELIMETER = '\t'
 
@@ -51,8 +55,25 @@ const deviceStringToObjects = deviceString =>
  * @type {TDtool}
  */
 class TDtool {
-  constructor(log) {
+
+  /**
+   * TDtool constructor.
+   *
+   * @constructor
+   * @alias TDtool
+   * @param {Function} log    A method that accepts a string, to be used for
+   *                          logging messages to it.
+   * @param {Object}   config An optional configuration object that provides
+   *                          information for how to interpret TDtool.
+   *                          Default configuration looks like:
+   *                          {
+   *                            tellstickConfLocation: '/etc/tellstick.conf',
+   *                          }
+   */
+  constructor(log, config) {
     this.log = string => log(`[TDtool]: ${string}`)
+    this.log(`Recieved configuration ${config}`)
+    this.config = Object.assign({}, DEFAULT_CONFIGURATION, config || {})
   }
 
   /**
@@ -83,6 +104,31 @@ class TDtool {
   }
 
   /**
+   * Reads a configuration file, as specified in the config object passed
+   * into the constructor. Defaults to '/etc/tellstick.conf'.
+   *
+   * Once a the file has been read, the value is cached, and it is returned
+   * instead on subsequent calls. This is done as Homebridge will need to
+   * be restarted regardless to discover or add new devices, so there is no
+   * need for this plugin to look for new devices later on.
+   *
+   * @return {Promise} Promise that is resolved with the contents of the
+   *                   parsed file, or rejected with any errors that
+   *                   occurred when reading the file.
+   */
+  _getParsedConfFile() {
+    if (this.parsedConfFile) return Promise.resolve(this.parsedConfFile)
+
+    const tellstickFile = this.config.tellstickConfLocation
+    return confParser.parse(tellstickFile).then(conf => {
+      this.parsedConfFile = conf
+      this.log(`"${tellstickFile}" lists ` +
+               conf.devices.map(d => `"${d.name}"`).join(', '))
+      return conf
+    })
+  }
+
+  /**
    * Returns a list of all devices found using tdtool.
    *
    * For devices to be returned, they both need to be present
@@ -104,10 +150,7 @@ class TDtool {
       this.log('"tdtool --list-devices" lists ' +
                tdtoolDevices.map(d => `"${d.name}"`).join(', '))
 
-      return confParser.parse('/etc/tellstick.conf').then(conf => {
-        this.log('"/etc/tellstick.conf" lists ' +
-                 conf.devices.map(d => `"${d.name}"`).join(', '))
-
+      return this._getParsedConfFile().then(conf => {
         return tdtoolDevices
           .map(device => Object.assign(
             conf.devices.find(confDev => confDev.id === device.id), device))

@@ -80,6 +80,21 @@ Below is the supported attributes for the sensor list.
 |  `model`  |   _Required_   | See below for supported models                  |
 | `maxAge`  |     `3600`     | Seconds from last update until considered stale |
 
+#### Configuring TDtool
+
+If your `tellstick.conf` is located anywhere other than `/etc/tellstick.conf`,
+the following can be used to specify a custom location:
+
+```json
+{
+  "platform" : "Telldus-TD-Tool",
+  "name" : "Telldus-TD-Tool",
+  "tdtool": {
+    "tellstickConfLocation": "/home/pi/tellstick.configuration"
+  }
+}
+```
+
 #### Supported accessories
 
 |         Model         |           Backed by            |
